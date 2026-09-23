@@ -12,17 +12,16 @@ import SwiftUI
 
 struct ContentView: View {
     
-    private var hardCodedEmail = "test@test.at"
-    private var hardoCodedPassword = "1234"
     
-    @State private var emailAddress: String = ""
-    @State private var password: String = ""
+    @State private var emailAddress: String = "mad-fe@mad.at"
+    @State private var password: String = "madmad"
     @State private var showAlert = false
     @State private var alertMessage =  ""
     @State private var isLoggedIn = false
     
     
     private func attemptLogin(){
+        
         guard !emailAddress.isEmpty else {
             alertMessage = "Email Field is Empty"
             showAlert = true
@@ -37,22 +36,37 @@ struct ContentView: View {
         
             isLoggedIn = true
     
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        Networking().login(email: emailAddress, password: password) {
+            user, error in
+            isLoggedIn = false
             
-               
-            
-                // This code executes after 2 seconds// Check here if the login was successful}
-                if emailAddress == hardCodedEmail && password == hardoCodedPassword {
-                    alertMessage = "Successfull Login"
-                    showAlert = true
-                }else{
-                    alertMessage = "Wrong Credentials"
-                    showAlert = true
+            if let error = error {
+                switch error {
+                    case .serializingError:
+                        alertMessage = "Die Eingabe konnte nicht verarbeitet werden."
+                    case .nonEmailAddressError:
+                        alertMessage = "Das ist keine gültige E-Mail-Adresse."
+                    case .wrongEmailAdressError:
+                        alertMessage = "Diese E-Mail-Adresse existiert nicht."
+                    case .wrongCredentialsError:
+                        alertMessage = "E-Mail oder Passwort ist falsch."
+                    case .noNetworkError:
+                        alertMessage = "Keine Internetverbindung."
+                    case .unexpectedJSONError:
+                        alertMessage = "Die Antwort des Servers war unerwartet."
+                    case .nonSuccessfulResponseError:
+                        alertMessage = "Der Server hat einen Fehler gemeldet."
+                    case .unknownError:
+                        alertMessage = "Ein unbekannter Fehler ist aufgetreten."
                 }
-                
-                isLoggedIn = false
-                    
+                showAlert = true
+                return
             }
+            if user != nil {
+                alertMessage = "Login erfolgreich!"
+                showAlert = true
+            }
+        }
 
     }
     
