@@ -1,16 +1,12 @@
 //
-//  ContentView.swift
+//  LoginView.swift
 //  mad-exercise
 //
 //  Created by Lindrit Prekaj on 22.09.26.
 //
-
-
-
-
 import SwiftUI
 
-struct ContentView: View {
+struct LoginView: View {
     
     
     @State private var emailAddress: String = "mad-fe@mad.at"
@@ -18,6 +14,7 @@ struct ContentView: View {
     @State private var showAlert = false
     @State private var alertMessage =  ""
     @State private var isLoggedIn = false
+    @State private var loginSuccessful: Bool = false
     
     
     private func attemptLogin(){
@@ -65,6 +62,7 @@ struct ContentView: View {
             if user != nil {
                 alertMessage = "Login erfolgreich!"
                 showAlert = true
+                loginSuccessful = true
             }
         }
 
@@ -122,9 +120,6 @@ struct ContentView: View {
             
             Button("Login") {
                 attemptLogin()
-                                    
-                
-             
             }
             .frame(maxWidth: .infinity)
             .font(.title .bold())
@@ -136,16 +131,23 @@ struct ContentView: View {
             }
             
             Spacer()
+
+
         }
         .padding(30)
         .alert(alertMessage, isPresented: $showAlert){
             Button("OK") {}
         }
+        .navigationTitle("Login")
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationDestination(isPresented: $loginSuccessful){
+            CountriesView()
+        }
+
+        
 
         }
         
     }
 
-#Preview {
-    ContentView()
-}
+

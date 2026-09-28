@@ -11,7 +11,10 @@ import SwiftUI
 struct mad_exerciseApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack{
+                LoginView()  
+            }
+            
         }
     }
 }
