@@ -14,7 +14,8 @@ struct LoginView: View {
     @State private var showAlert = false
     @State private var alertMessage =  ""
     @State private var isLoggedIn = false
-    @State private var loginSuccessful: Bool = false
+    @State private var userSaved: User?
+    @State private var networking: Networking = Networking()
     
     
     private func attemptLogin(){
@@ -33,7 +34,7 @@ struct LoginView: View {
         
             isLoggedIn = true
     
-        Networking().login(email: emailAddress, password: password) {
+        networking.login(email: emailAddress, password: password) {
             user, error in
             isLoggedIn = false
             
@@ -59,10 +60,10 @@ struct LoginView: View {
                 showAlert = true
                 return
             }
-            if user != nil {
+            if let user{
                 alertMessage = "Login erfolgreich!"
                 showAlert = true
-                loginSuccessful = true
+                userSaved = user
             }
         }
 
@@ -140,8 +141,9 @@ struct LoginView: View {
         }
         .navigationTitle("Login")
         .toolbar(.hidden, for: .navigationBar)
-        .navigationDestination(isPresented: $loginSuccessful){
-            CountriesView()
+        .navigationDestination(item: $userSaved) {
+            user in 
+            CountriesView(user: user, networking: networking)
         }
 
         

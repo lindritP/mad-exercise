@@ -104,7 +104,40 @@ class Networking {
         
     }
     
-    
+    func getCountries(idToken: String) {
+
+        let url = URL(string:  "https://firestore.googleapis.com/v1/projects/mad-fe/databases/(default)/documents/countries?pageSize=1000&orderBy=name")!
+
+        var request = URLRequest(url: url)
+
+        request.httpMethod = "GET"
+
+        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+
+        let task = urlSesion.dataTask(with: request) {
+            data, response, error in
+
+            guard let data = data else {
+                print(error ?? "No data received")
+                return
+            }
+
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .formatted(.iso8601Full)
+
+            do {
+                let result = try decoder.decode(DocumentsContainer.self, from: data)
+                print("Decoded \(result.documents.count) countries")
+                print(result.documents.first as Any)
+            } catch {
+                print(error)
+            }
+
+        }
+        task.resume()
+
+    }
+
 }
 
 
