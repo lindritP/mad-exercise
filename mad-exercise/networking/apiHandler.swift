@@ -104,7 +104,7 @@ class Networking {
         
     }
     
-    func getCountries(idToken: String) {
+    func getCountries(idToken: String, completionHandler: @escaping ([Country]?, NetworkingError?)->Void){
 
         let url = URL(string:  "https://firestore.googleapis.com/v1/projects/mad-fe/databases/(default)/documents/countries?pageSize=1000&orderBy=name")!
 
@@ -117,20 +117,55 @@ class Networking {
         let task = urlSesion.dataTask(with: request) {
             data, response, error in
 
-            guard let data = data else {
-                print(error ?? "No data received")
+            if let error = error {
+                let nsError = error as NSError
+                DispatchQueue.main.async {
+                    if nsError.code == NSURLErrorNotConnectedToInternet {
+                        completionHandler(nil, .noNetworkError)
+                    } else {
+                        completionHandler(nil, .unknownError)
+                    }
+                }
+                return
+            }
+
+            guard let data = data else{
+                DispatchQueue.main.async {
+                    completionHandler(nil, .unexpectedJSONError)
+                }
                 return
             }
 
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .formatted(.iso8601Full)
 
-            do {
-                let result = try decoder.decode(DocumentsContainer.self, from: data)
-                print("Decoded \(result.documents.count) countries")
-                print(result.documents.first as Any)
-            } catch {
-                print(error)
+            if let documentsContainer = try? decoder.decode(DocumentsContainer.self, from: data) {
+                DispatchQueue.main.async {
+                    completionHandler(documentsContainer.documents, nil)
+                }
+                return
+            }
+
+            if let responseError = try? decoder.decode(FirestoreResponseError.self, from: data){
+                DispatchQueue.main.async {
+                    switch responseError.error.status{
+                    case "UNAUTHENTICATED", "PERMISSION_DENIED":
+                        completionHandler(nil, .unauthorizedError)
+                    default:
+                        completionHandler(nil, .nonSuccessfulResponseError)
+                    }
+                }
+                return
+            }
+
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+
+            DispatchQueue.main.async {
+                if (200..<300).contains(statusCode) {
+                    completionHandler(nil, .unexpectedJSONError)
+                } else {
+                    completionHandler(nil, .nonSuccessfulResponseError)
+                }
             }
 
         }

@@ -39,24 +39,7 @@ struct LoginView: View {
             isLoggedIn = false
             
             if let error = error {
-                switch error {
-                    case .serializingError:
-                        alertMessage = "Die Eingabe konnte nicht verarbeitet werden."
-                    case .nonEmailAddressError:
-                        alertMessage = "Das ist keine gültige E-Mail-Adresse."
-                    case .wrongEmailAdressError:
-                        alertMessage = "Diese E-Mail-Adresse existiert nicht."
-                    case .wrongCredentialsError:
-                        alertMessage = "E-Mail oder Passwort ist falsch."
-                    case .noNetworkError:
-                        alertMessage = "Keine Internetverbindung."
-                    case .unexpectedJSONError:
-                        alertMessage = "Die Antwort des Servers war unerwartet."
-                    case .nonSuccessfulResponseError:
-                        alertMessage = "Der Server hat einen Fehler gemeldet."
-                    case .unknownError:
-                        alertMessage = "Ein unbekannter Fehler ist aufgetreten."
-                }
+                alertMessage = error.message
                 showAlert = true
                 return
             }

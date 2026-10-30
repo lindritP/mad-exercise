@@ -10,6 +10,14 @@ struct CountriesView : View {
         Text("Hier kommen die Länder hin. 🇦🇱")
         .navigationTitle("Countries")
 
-        .onAppear(perform: {networking.getCountries(idToken: user.idToken)})
+        .onAppear(perform: {
+            networking.getCountries(idToken: user.idToken) { countries, error in
+                if let error {
+                    print(error.message)
+                    return
+                }
+                print("Loaded \(countries?.count ?? 0) countries")
+            }
+        })
     }
 }
