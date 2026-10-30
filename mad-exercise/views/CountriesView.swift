@@ -25,18 +25,22 @@ struct CountriesView : View {
         Group {
             if let countries {
                 List(countries) { country in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(country.name)
-                                .font(.headline)
-                            Text(country.native)
+                    NavigationLink {
+                        CountryDetailView(country: country)
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(country.name)
+                                    .font(.headline)
+                                Text(country.native)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text(country.capital)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
-                        Spacer()
-                        Text(country.capital)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
                     }
                 }
             } else if let errorMessage {
